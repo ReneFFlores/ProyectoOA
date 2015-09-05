@@ -110,3 +110,34 @@ int main (int argc, char*argv[]){
 /*--------------------------------------------------------------------------*/
 /*----------------------Implementacion de metodos---------------------------*/
 
+
+//Implementacion de metodos para cliente
+//esta es la base para los demas en cuanto a si funciona...de ahi trankilo todo
+void agregar_cliente(){
+
+}
+
+void eliminar_cliente(){
+
+}
+
+void modificar_cliente(){
+
+}
+
+void listar_clientes(){
+
+}
+
+void busqueda_sin_indice_cliente(){
+
+}
+
+void busqueda_con_indice_cliente(){
+
+}
+
+void reindexar_clientes(){
+
+}
+
