@@ -1,7 +1,12 @@
 #include <iostream>
+#include <fstream>
+#include <cmath>
+#include <list>
+#include <string>
 
 using namespace std;
 
+/*------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------*/
 /*--------------------------Métodos del proyecto--------------------------------*/
 //netodos para cliente
@@ -66,7 +71,42 @@ struct Llamadas{
 };
 
 
+/*--------------------------------------------------------------------------*/
+/*------------------------------MAIN----------------------------------------*/
+
 int main (int argc, char*argv[]){
-    cout << "int: " << sizeof(int);
+    char op;
+    while(true){
+      cout << "Ingrese su opcion" << endl;
+      cout << "1.- Sobre clientes" << endl;
+      cout << "2.- Sobre ciudades" << endl;
+      cout << "3.- Sobre lineas" << endl;
+      cout << "4.- Sobre transacciones" << endl;
+      cout << "5.- Sobre tarifas" << endl;
+      cout << "6.- Salir" << endl;
+      cin >> op;
+
+      if(op=='1'){
+
+      }else if(op=='2'){
+
+      }else if(op=='3'){
+        
+      }else if(op=='4'){
+        
+      }else if(op=='5'){
+        
+      }else if(op=='6'){
+        cout << "Adios!" << endl;
+        break;
+      }else {
+        cout << "Ingrese numro del 1-6, segun sus opciones" << endl;
+      }
+    }//while true, sale al escoger salir
     return 0;
 }
+
+
+/*--------------------------------------------------------------------------*/
+/*----------------------Implementacion de metodos---------------------------*/
+
