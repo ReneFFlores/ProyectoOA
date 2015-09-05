@@ -47,11 +47,12 @@ struct Ciudad{
 
 //atributos de Llamadas
 struct Llamadas{
-      
+   int numero;//el que llama
+   int destino;//el q recibe llamada
+   char fecha_inicio[14];// YYYY-MM-DD-HH-MM-SS   
 };
 
-int main (char*argc, char*argv[]){
+int main (int argc, char*argv[]){
     cout << "int: " << sizeof(int);
-    system("Pause");
     return 0;
 }
