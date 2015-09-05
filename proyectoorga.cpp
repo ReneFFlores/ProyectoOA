@@ -8,19 +8,32 @@ using namespace std;
 void agregar_cliente();
 void eliminar_cliente();
 void modificar_cliente();
-void listar_sin_indice_cliente();
-void listar_con_indice_cliente();
-void busqueda();
+void listar_clientes();
+void busqueda_sin_indice_cliente();
+void busqueda_con_indice_cliente();
+void reindexar_clientes();
 
 //metodos para llamadas
 void agregar_llamada();
-void busqueda_con_indice_transaccion();
-void busqueda_sin_indice_transaccion();
+void listar_llamadas();
 
 //agregar una linea
 void agregar_linea();
+void eliminar_linea();
+void modificar_linea();
+void listar_linea();
 void busqueda_con_indice_lineas();
 void busqueda_sin_indice_lineas();
+void reindexar_linea();
+
+//metodos para ciudad
+void agregar_ciudad();
+void eliminar_ciudad();
+void modificar_ciudad();
+void listar_ciudad();
+void busqueda_sin_indice_ciudad();
+void busqueda_con_indice_ciudad();
+void reindexar_ciudad();
 
 
 /*------------------------------------------------------------------------------*/
@@ -36,7 +49,7 @@ struct Cliente{
 //atributos de lineas
 struct Lineas{
    int IdCliente;
-   int Teleforno;   
+   int Telefono;   
 };
 
 //atributos de ciudad
@@ -51,6 +64,7 @@ struct Llamadas{
    int destino;//el q recibe llamada
    char fecha_inicio[14];// YYYY-MM-DD-HH-MM-SS   
 };
+
 
 int main (int argc, char*argv[]){
     cout << "int: " << sizeof(int);
