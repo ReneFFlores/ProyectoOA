@@ -47,10 +47,7 @@ struct Ciudad{
 
 //atributos de Llamadas
 struct Llamadas{
-   int IdCliente;
-   char NombreCliente[40];
-   char Genero[1];
-   int IdCiudad;    
+      
 };
 
 int main (char*argc, char*argv[]){
