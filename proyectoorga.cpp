@@ -47,10 +47,10 @@ void reindexar_ciudad();
 /*--------------------------"Clases" del proyecto-------------------------------*/
 //atributos de clientes
 struct Cliente{
-   char IdCliente[13];//de 13 digitos
+   int IdCliente;//de 13 digitos
    char NombreCliente[40];
    char Genero[1];
-   char IdCiudad[13];//de 4 bytes    
+   int IdCiudad;//de 4 bytes    
 };
 
 //atributos de lineas
@@ -129,16 +129,38 @@ void modificar_cliente(){
 }
 
 void listar_clientes(){
-   ifstream listar;
-   listar.open("personas.txt");
-   Cliente client;
-   while(!(listar.eof())){
-      listar >> client.IdCliente >> client.NombreCliente >> client.Genero >> client.IdCiudad;
-      cout << client.IdCliente << client.NombreCliente<< client.Genero << client.IdCiudad << endl;
-   }
+   ifstream listar("personas.txt");
+   int rrn = -1;
+   int cantidad_registros = 500;
+   int flag = 0;
+   while(!listar.eof()){
+      char IdCliente[15];
+      char NombreCliente[40];
+      char Genero[1];
+      char IdCiudad[5];
+      string str1 = "", str2 = "",str3 = "",str4 = "";
+      getline(listar, str1, ',');
+      getline(listar, str2, ',');
+      getline(listar, str3, ',');
+      getline(listar, str4, ',');
+      for(int i = 0; i < sizeof(IdCliente);i++){
+          IdCliente[i] = str1[i];
+      }
+      for(int i = 0; i < sizeof(NombreCliente); ++i){
+          NombreCliente[i] = str2[i];
+      }
+      for(int i = 0; i < sizeof(Genero);i++){
+          Genero[i] = str3[i];
+      }
+      for (int i = 0; i < sizeof(IdCiudad);i++){
+          IdCiudad[i] = str4[i];
+      }
+      cout << "ID: " << IdCliente << ", Nombre: " << NombreCliente << ", Sexo: " << Genero << ", # de ciudad: " << IdCiudad << endl;
+    }
 
-   listar.close();
+    listar.close();
 }
+  
 
 void busqueda_sin_indice_cliente(){
 
