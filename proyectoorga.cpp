@@ -3,6 +3,8 @@
 #include <cmath>
 #include <list>
 #include <string>
+#include <stdlib.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -45,10 +47,10 @@ void reindexar_ciudad();
 /*--------------------------"Clases" del proyecto-------------------------------*/
 //atributos de clientes
 struct Cliente{
-   int IdCliente;//de 13 digitos
+   char IdCliente[13];//de 13 digitos
    char NombreCliente[40];
    char Genero[1];
-   int ciudad;//de 4 bytes    
+   char IdCiudad[13];//de 4 bytes    
 };
 
 //atributos de lineas
@@ -89,7 +91,7 @@ int main (int argc, char*argv[]){
       if(op=='1'){
 
       }else if(op=='2'){
-
+        listar_clientes();
       }else if(op=='3'){
         
       }else if(op=='4'){
@@ -119,6 +121,7 @@ void agregar_cliente(){
 
 void eliminar_cliente(){
 
+  reindexar_clientes();
 }
 
 void modificar_cliente(){
@@ -126,7 +129,15 @@ void modificar_cliente(){
 }
 
 void listar_clientes(){
+   ifstream listar;
+   listar.open("personas.txt");
+   Cliente client;
+   while(!(listar.eof())){
+      listar >> client.IdCliente >> client.NombreCliente >> client.Genero >> client.IdCiudad;
+      cout << client.IdCliente << client.NombreCliente<< client.Genero << client.IdCiudad << endl;
+   }
 
+   listar.close();
 }
 
 void busqueda_sin_indice_cliente(){
