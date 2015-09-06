@@ -89,9 +89,9 @@ int main (int argc, char*argv[]){
       cin >> op;
 
       if(op=='1'){
-
-      }else if(op=='2'){
         listar_clientes();
+      }else if(op=='2'){
+        listar_ciudad();
       }else if(op=='3'){
         
       }else if(op=='4'){
@@ -159,7 +159,7 @@ void listar_clientes(){
     }
 
     listar.close();
-}
+}//Listo
   
 
 void busqueda_sin_indice_cliente(){
@@ -174,3 +174,51 @@ void reindexar_clientes(){
 
 }
 
+/*------------------------------------------------------------------------------*/
+/*------------------------------------Metodos de ciudad-------------------------*/
+void agregar_ciudad(){
+
+}
+
+void eliminar_ciudad(){
+
+}
+
+void modificar_ciudad(){
+
+}
+
+void listar_ciudad(){
+   ifstream listar("ciudades.txt");
+   int rrn = -1;
+   int cantidad_registros = 30;
+   int flag = 0;
+   while(!listar.eof()){
+      char IdCiudad[5];
+      char NombreCiudad[40];
+      string str1 = "", str2 = "";
+      getline(listar, str1, ',');
+      getline(listar, str2, ',');
+      for(int i = 0; i < sizeof(NombreCiudad);i++){
+          NombreCiudad[i] = str1[i];
+      }
+      for (int i = 0; i < sizeof(IdCiudad);i++){
+          IdCiudad[i] = str2[i];
+      }
+      cout << "ID: " << IdCiudad << ", Nombre: " << NombreCiudad<< endl;
+    }
+
+    listar.close();
+}
+
+void busqueda_sin_indice_ciudad(){
+
+}
+
+void busqueda_con_indice_ciudad(){
+
+}
+
+void reindexar_ciudad(){
+
+}
