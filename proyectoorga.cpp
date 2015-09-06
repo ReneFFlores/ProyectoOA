@@ -44,6 +44,7 @@ void reindexar_ciudad();
 
 
 /*------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 /*--------------------------"Clases" del proyecto-------------------------------*/
 //atributos de clientes
 struct Cliente{
@@ -74,6 +75,7 @@ struct Llamadas{
 
 
 /*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
 /*------------------------------MAIN----------------------------------------*/
 
 int main (int argc, char*argv[]){
@@ -83,8 +85,8 @@ int main (int argc, char*argv[]){
       cout << "1.- Sobre clientes" << endl;
       cout << "2.- Sobre ciudades" << endl;
       cout << "3.- Sobre lineas" << endl;
-      cout << "4.- Sobre transacciones" << endl;
-      cout << "5.- Sobre tarifas" << endl;
+      cout << "4.- Sobre transacciones/llamadas" << endl;
+      cout << "5.- Consultar tarifas" << endl;
       cout << "6.- Salir" << endl;
       cin >> op;
 
@@ -93,7 +95,7 @@ int main (int argc, char*argv[]){
       }else if(op=='2'){
         listar_ciudad();
       }else if(op=='3'){
-        
+        listar_linea();
       }else if(op=='4'){
         
       }else if(op=='5'){
@@ -174,6 +176,7 @@ void reindexar_clientes(){
 
 }
 
+
 /*------------------------------------------------------------------------------*/
 /*------------------------------------Metodos de ciudad-------------------------*/
 void agregar_ciudad(){
@@ -222,3 +225,55 @@ void busqueda_con_indice_ciudad(){
 void reindexar_ciudad(){
 
 }
+
+
+/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/*----------------------Metods de lineas-----------------------------.*/
+void agregar_linea(){
+
+}
+
+void eliminar_linea(){
+
+}
+
+void modificar_linea(){
+
+}
+
+void listar_linea(){
+   ifstream listar("lineas.txt");
+   int rrn = -1;
+   int cantidad_registros = 500;
+   int flag = 0;
+   while(!listar.eof()){
+      char IdCliente[15];
+      char Telefono[9];
+      string str1 = "", str2 = "";
+      getline(listar, str1, ',');
+      getline(listar, str2, ',');
+      for(int i = 0; i < sizeof(IdCliente);i++){
+          IdCliente[i] = str1[i];
+      }
+      for (int i = 0; i < sizeof(Telefono);i++){
+          Telefono[i] = str2[i];
+      }
+      cout << "ID cliente: " << IdCliente << ", Numero telefonico: " << Telefono << endl;
+    }
+
+    listar.close();
+}
+
+void busqueda_con_indice_lineas(){
+
+}
+
+void busqueda_sin_indice_lineas(){
+
+}
+
+void reindexar_linea(){
+
+}
+
