@@ -4,7 +4,9 @@
 #include <list>
 #include <string>
 #include <stdlib.h>
+#include <cstdlib>
 #include <stdio.h>
+#include <sstream>
 
 using namespace std;
 
@@ -79,7 +81,7 @@ struct Llamadas{
 /*------------------------------MAIN----------------------------------------*/
 
 int main (int argc, char*argv[]){
-    char op;
+    char op;;
     while(true){
       cout << "Ingrese su opcion" << endl;
       cout << "1.- Sobre clientes" << endl;
@@ -91,11 +93,49 @@ int main (int argc, char*argv[]){
       cin >> op;
 
       if(op=='1'){
-        listar_clientes();//ya esta!
-        //agregar_cliente();
+        char op_interno;
+        cout << "Ingrese que desea hacer con sus clientes" << endl;
+        cin >> op_interno;
+        if(op_interno=='1'){
+          cout << "Listando clientes" << endl;
+          listar_clientes();
+        }else if(op_interno=='2'){
+          cout << "Agregar cliente" << endl;
+          agregar_cliente();          
+        }else if(op_interno=='3'){
+
+        }else if(op_interno=='4'){
+
+        }else if(op_interno=='5'){
+
+        }else if(op_interno=='6'){
+
+        }else{
+
+        }
       }else if(op=='2'){
-        //listar_ciudad();
-        agregar_cliente();
+        char op_interno;
+        cout << "Ingrese que desea hacer con sus ciudades" << endl;
+        cout << "1.- Listar" << endl;
+        cout << "2.- Agregar" << endl;
+        cin >> op_interno;
+        if(op_interno=='1'){
+          cout << "Listando ciudades" << endl;
+          listar_ciudad();
+        }else if(op_interno=='2'){
+          cout << "Agregar ciudad" << endl;
+          agregar_ciudad();          
+        }else if(op_interno=='3'){
+
+        }else if(op_interno=='4'){
+
+        }else if(op_interno=='5'){
+
+        }else if(op_interno=='6'){
+
+        }else{
+
+        }
       }else if(op=='3'){
         //listar_linea();
       }else if(op=='4'){
@@ -120,35 +160,54 @@ int main (int argc, char*argv[]){
 //Implementacion de metodos para cliente
 //esta es la base para los demas en cuanto a si funciona...de ahi trankilo todo
 void agregar_cliente(){
-   ofstream file;
-   file.open("personas2.txt",std::ios::app);
-   char anio[4];
-   char nombre[20];
-   char apellido[20];
-   char genero[1];
-   char id_ciudad[5];
-   char taking_one_char_for_the_team[1];
- 
-   cout << "Agregando registro de un nuevo cliente" << endl;
-   if(!(file))
-    cout << "Error de apuertura del archivo" << endl;
-   else{
-    cout << "Ingrese el nombre del Cliente: " << endl;
-    cin >> nombre;
-    cout << "Ingrese apellido del cliente" << endl;
-    cin >> apellido;
-    cout << "Ingrese año de nacimiento" << endl;
-    //cin >> taking_one_char_for_the_team;
-    cin >> anio;
-    cout << "Igrese el sexo de la persona: (M = masculino, F = femenino)" << anio << endl;
-    cin >> genero;
-    cout << "Ingrese identidad de ciudad de la persona: " << endl;
-    cin >> id_ciudad;
+   string nombre_string = "", apel_string = "",ciudad_string, sex, birth_year;
+   stringstream ss;
+   string id_temp;
+   ofstream cliente_mas("personas.txt",std::ios::app);
+   char Id_cliente[14];
+   char Nombre_cliente[40];
+   char Sexo[2];
+   char Id_ciudad[4];
+
+   cout << "Ingrese primer nombre del cliente(a)" << endl;
+   cin >> nombre_string;
+   cout << "Ingrese segundo nombre del cliente(a)" << endl;
+   cin >> apel_string;
+   cout << "Ingrese año de nacimiento del cliente(a)" << endl;
+   cin >> birth_year;
+   cout << "Ingrese código de la ciudad del cliente(a)" << endl;
+   cin >> ciudad_string;
+   cout << "Ingrese sexo de su cliente(a)" << endl;
+   cin >> sex;
+
+   string nombre_cliente_definitivo = "";
+   nombre_cliente_definitivo += nombre_string;
+   nombre_cliente_definitivo += " ";
+   nombre_cliente_definitivo += apel_string;
+
+   for(int i = 0; i < sizeof(Nombre_cliente); i++){
+      Nombre_cliente[i] = nombre_cliente_definitivo[i];
    }
 
-   file << endl << id_ciudad << anio << 10501 << ',' << nombre << ' ' << apellido << ',' << genero << ',' << id_ciudad << ',';
-   file.close();
-   cout << "Exito de adicion" << endl;
+   for(int i = 0; i < sizeof(Sexo); i++){
+      Sexo[i] = sex[i];
+   }
+
+   for(int i = 0; i < sizeof(Id_ciudad); i++){
+      Id_ciudad[i] = ciudad_string[i];
+   }
+
+   id_temp += ciudad_string;
+   id_temp += birth_year;
+   id_temp += "10505";//poner este dato aun binario
+
+   for(int i = 0; i < sizeof(Id_cliente); i++){
+      Id_cliente[i] = id_temp[i];
+   }
+
+   cliente_mas << endl << id_temp << ',' << Nombre_cliente << ',' << Sexo << ',' << ciudad_string << ',';
+   cliente_mas.close();
+   cout << "Exito al ingresar cliente" << endl;
 }
 
 void eliminar_cliente(){
@@ -160,7 +219,8 @@ void modificar_cliente(){
 }
 
 void listar_clientes(){
-   ifstream listar("personas2.txt");
+   //Se resuelve en QT
+   ifstream listar("personas.txt");
    int rrn = -1;
    int cantidad_registros = 501;
    int flag = 0;
@@ -209,7 +269,40 @@ void reindexar_clientes(){
 /*------------------------------------------------------------------------------*/
 /*------------------------------------Metodos de ciudad-------------------------*/
 void agregar_ciudad(){
+   string nombre_string = "";
+   ifstream avail_city("final_4_id_city.txt",std::ios::app);
+   char cit[40];
+   int final_city_avail_int_form;// = stoi(final_city_avail_string);
+   avail_city >> final_city_avail_int_form;
+   cout << final_city_avail_int_form << endl;
+   avail_city.close();
 
+   //ida de lleno de ciudaad
+   ofstream ciudad_mas("ciudades.txt",std::ios::app);
+   cout << "Ingrese nombre de la ciudad" << endl;
+   cin >> cit;
+
+   nombre_string = string(cit);
+
+   ciudad_mas << endl;
+
+   //ciudad_mas << endl << final_city_avail << ',';
+   for(int i = 0; i < nombre_string.length(); i++){
+       ciudad_mas << nombre_string[i];
+   }
+
+   ciudad_mas << ',';
+   final_city_avail_int_form++;
+   ciudad_mas << final_city_avail_int_form;
+   ciudad_mas << ',';
+
+   remove("final_4_id_city.txt");
+
+   ofstream nuevo_final("final_4_id_city.txt");
+   nuevo_final << final_city_avail_int_form;
+   nuevo_final.close();
+   ciudad_mas.close();
+   cout << "Exito al ingresar ciudad" << endl;
 }
 
 void eliminar_ciudad(){
@@ -223,7 +316,7 @@ void modificar_ciudad(){
 void listar_ciudad(){
    ifstream listar("ciudades.txt");
    int rrn = -1;
-   int cantidad_registros = 30;
+   int cantidad_registros = 35;
    int flag = 0;
    while(!listar.eof()){
       char IdCiudad[5];
