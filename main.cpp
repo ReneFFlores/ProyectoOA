@@ -637,20 +637,20 @@ void buscar_id_cliente(string identidad){
 
 //Agregar ciudad
 void Agregar_Ciudad(){
-   Ciudad city;
-   //abrimos el archivo con el ultimo registro
-   ifstream for_pos("last_index_city.txt");
-   for_pos >> city.id;
-   for_pos.close();
+    Ciudad city;
+    //abrimos el archivo con el ultimo registro
+    ifstream for_pos("last_index_city.txt");
+    for_pos >> city.id;
+    for_pos.close();
    
-   //jugamos con la posicion 
-   remove("last_index_city.txt");
-   ofstream new_last_index;
-   new_last_index.open("last_index_city.txt");
-   new_last_index << (city.id+1);
-   new_last_index.close();
+    //jugamos con la posicion 
+    remove("last_index_city.txt");
+    ofstream new_last_index;
+    new_last_index.open("last_index_city.txt");
+    new_last_index << (city.id+1);
+    new_last_index.close();
    
-   //agregamos
+    //agregamos
 	ofstream outFile;
 	outFile.open("binary_cities.dat",ios::binary|ios::app);
 	string nom;
@@ -889,7 +889,7 @@ void Listar_Todo(){
 		cout << "Archivo no disponible :(" << endl;
 		return;
 	}	
-   int i = 0;
+    int i = 0;
 	while(!inFile.eof()){
        string emisor_id, receptor_id, emisor_num, receptor_num, date_init, date_end;
        string seconds;
