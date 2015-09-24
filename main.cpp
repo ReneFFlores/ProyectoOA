@@ -101,12 +101,13 @@ void Busqueda_No_Indexada_Lineas(string);
 
 //Metodos relacionados con las transacciones
 void Listar_Todo();
-void Generar_Factura_Ineficiente(string);
+void Generar_Factura(string);
 
 //Metodos relacionados con menues
 void Administrar_Clientela();
 void Administrar_Ciudades();
 void Administrar_Lineas();
+void Administrar_Transacciones();
 
 //------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------
@@ -117,6 +118,7 @@ void Administrar_Lineas();
 
 int main(int argc,char*argv[]){
    Cliente_txt_bin();
+   //Index_Cliente_txt_bin();
    City_txt_bin();
    Lineas_txt_bin();
    //Eliminar_Ciudad(int);
@@ -126,11 +128,11 @@ int main(int argc,char*argv[]){
    //Agregar_Cliente();
    //Busqueda_No_Indexada_Ciudad(int);
    //Listar_Ciudades();
-   //Listar_Todo();
+   Listar_Todo();
    //Listar_Lineas();
    //Agregar_Linea();
    //Busqueda_No_Indexada_Lineas("1010198810499");
-   //Generar_Factura_Ineficiente("1010198810499");
+   //Generar_Factura("1010198810499");
    
    remove("binary_client.dat");
    remove("binary_cities.dat");
@@ -390,6 +392,44 @@ void Administrar_Lineas(){
     }while(ch!='6');
 }
 
+void Administrar_Transacciones(){
+	char ch;
+	int num;
+	string identidad_busqueda = "";
+
+	do{
+		cout << "Administrando las Transacciones" << endl;
+		cout << "1.- Generar Factura ineficiente" << endl;
+		cout << "2.- Generar Factura eficiente" << endl;
+		cout << "3.- Listar todas las transacciones" << endl;
+		cout << "4.- Salir" << endl;
+		cin >> ch;
+		switch(ch){
+			case '1':
+            cout << "1.- Generar Factura ineficiente" << endl;
+            cout << "Ingrese la identidad de la persona que busca" << endl;
+            cin >> identidad_busqueda;
+			Generar_Factura(identidad_busqueda);
+			break;
+		case '2':
+            cout << "2.- Generar Factura eficiente" << endl;
+			cout << "Ingrese la identidad de la persona que busca" << endl; 
+            cin >> num;
+			//Busqueda_Indexada_Ciudad(num);
+			break;
+		case '3':
+			cout << "3.- Buscar Lineas (ID, osea no indexada)" << endl;
+			cout << "Ingrese la identidad de la persona cuya(s) linea(s) que busca" << endl;
+            cin >> identidad_busqueda;
+			Busqueda_No_Indexada_Lineas(identidad_busqueda);
+			break;
+		case '4':
+            cout << "Adios!" << endl;
+			break;
+		}
+    }while(ch!='4');
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------
@@ -484,28 +524,28 @@ void modify_Cliente(int n){
 	}
     while(File.read((char*)&client, sizeof(Cliente)) && encontrado == 0){
 		if(client.acno==n){
-	     cout << "Cliente No.: " << client.acno << endl;
-	     cout << "Nombre: " << client.name << endl;
-	     cout << "Sexo: " << client.gender << endl;
+	      cout << "Cliente No.: " << client.acno << endl;
+	      cout << "Nombre: " << client.name << endl;
+	      cout << "Sexo: " << client.gender << endl;
 		  cout << "Editando cliente" << endl;
 		  cout << endl << "--------------------------------Punto de edicion----------------------------" << endl;
 		  string nom, apel, nom_comp = "";
-	     cout << "Reingrese primer nombre del cliente" << endl;
-	     cin >> nom;
-	     cout << "Reingrese primer apellido del cliente" << endl;
-	     cin >> apel;
-	     nom_comp+=nom;
-	     nom_comp+=" ";
-	     nom_comp+=apel;
-	     strcpy(client.name,nom_comp.c_str());
-	     cout << "Reingrese el sexo de su cliente (Operado?)" << endl;
-	     cin >> client.gender;
-	     client.gender = toupper(client.gender);
-	     cout << "Reingrese ciudad de residencia del cliente" << endl;
-	     cin >> client.id_city;
+	      cout << "Reingrese primer nombre del cliente" << endl;
+	      cin >> nom;
+	      cout << "Reingrese primer apellido del cliente" << endl;
+	      cin >> apel;
+	      nom_comp+=nom;
+	      nom_comp+=" ";
+	      nom_comp+=apel;
+	      strcpy(client.name,nom_comp.c_str());
+	      cout << "Reingrese el sexo de su cliente (Operado?)" << endl;
+	      cin >> client.gender;
+	      client.gender = toupper(client.gender);
+	      cout << "Reingrese ciudad de residencia del cliente" << endl;
+	      cin >> client.id_city;
 		  int pos = (-1)*sizeof(Cliente);
 		  File.seekp(pos,ios::cur);
-	     File.write((char*) &client, sizeof(Cliente));
+	      File.write((char*) &client, sizeof(Cliente));
 		  cout << "Cliente(a) Actualizado!" << endl;
 		  encontrado = 1;
 		}
@@ -550,8 +590,8 @@ void Listar_Clientes(){
 		cout << "Archivo no disponible :(" << endl;
 		return;
 	}
-	cout << "  Identidad  *                Nombre                 * Sex * City";
-	cout << "-----------------------------------------------------------------" << endl;
+	//cout << "  Identidad  *                Nombre                 * Sex * City";
+	//cout << "-----------------------------------------------------------------" << endl;
 	while(inFile.read((char*)&client, sizeof(Cliente))){
 	     cout << "ID: "<< client.id << " Nombre: " << client.name << 
             " Genero: " << client.gender << " City id: "<< client.id_city << endl;
@@ -565,7 +605,7 @@ void buscar_id_cliente(string identidad){
 	bool flag = false;
 	bool equals = false;
 	ifstream inFile;
-   inFile.open("binary_client.dat",ios::binary);
+    inFile.open("binary_client.dat",ios::binary);
 	if(!inFile){
 		cout << "Archivo no disponible :(" << endl;
 		return;
@@ -574,7 +614,7 @@ void buscar_id_cliente(string identidad){
     while(inFile.read((char*)&client, sizeof(Cliente))){
       string temp(client.id);
 		if(temp==identidad){
-			cout << "Cliente No.: " << client.acno << endl;
+			//cout << "Cliente No.: " << client.acno << endl;
 			cout << "ID: " << client.id << endl;
 	        cout << "Nombre: " << client.name << endl;
 	        cout << "Sexo: " << client.gender << endl;
@@ -851,16 +891,16 @@ void Listar_Todo(){
 	}	
    int i = 0;
 	while(!inFile.eof()){
-      string emisor_id, receptor_id, emisor_num, receptor_num, date_init, date_end;
-      string seconds;
-      inFile >> emisor_id;
-      inFile >> emisor_num;
-      inFile >> receptor_id;
-      inFile >> receptor_num;
-      inFile >> date_init;
-      inFile >> date_end;
-      inFile >> seconds;       
-	   cout << i << ".- " << emisor_id << '(' << emisor_num << ") llamo al " << receptor_num << " por " << seconds << "segundos" << endl;
+       string emisor_id, receptor_id, emisor_num, receptor_num, date_init, date_end;
+       string seconds;
+       inFile >> emisor_id;
+       inFile >> emisor_num;
+       inFile >> receptor_id;
+       inFile >> receptor_num;
+       inFile >> date_init;
+       inFile >> date_end;
+       inFile >> seconds;       
+	   cout << i << ".- " << emisor_id << '(' << emisor_num << ") llamo al " << receptor_num << " por " << seconds << " segundos" << endl;
 	   i++;
 	   if(inFile.eof()){
          break;
@@ -870,8 +910,8 @@ void Listar_Todo(){
 }//FIN LISTAR TODAS LAS TRANSACCIONES
 
 
-//Generar_Factura_Ineficiente
-void Generar_Factura_Ineficiente(string cliente){
+//Generar_Factura
+void Generar_Factura(string cliente){
 	ifstream inFile;
 	inFile.open("llamadas.txt",ios::binary);
  
@@ -922,8 +962,10 @@ void Generar_Factura_Ineficiente(string cliente){
 		cout << "3.- Excelente, 0.05$ por minuto" << endl;
 		cout << "4.- Videollamada, 0.99$ por minuto" << endl;
 		cin >> op;
-		if(op<=4||op>=0){
+		if(op<=4 && op>0){
 			break;
+		}else{
+			cout << "Ingrese numero entre 1-4" << endl;
 		}
 	}
 
