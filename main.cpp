@@ -100,6 +100,7 @@ void Listar_Todo();
 //Metodos relacionados con menues
 void Administrar_Clientela();
 void Administrar_Ciudades();
+void Administrar_Lineas();
 
 //------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------
@@ -332,6 +333,54 @@ void Administrar_Ciudades(){
 		}
 		//getch();
     }while(ch!='7');
+}
+
+void Administrar_Lineas(){
+	char ch;
+	int num;
+	string identidad_busqueda = "";
+
+	do{
+		cout << "Administrando las Lineas" << endl;
+		cout << "1.- Agregar Lineas" << endl;
+		cout << "2.- Buscar Lineas (Indexado)" << endl;
+		cout << "3.- Buscar Lineas (ID)" << endl;
+		cout << "4.- Listar Lineas" << endl;
+		cout << "5.- Eliminar Lineas" << endl;
+		cout << "6.- Salir del menu de lineas" << endl;
+		cin >> ch;
+		switch(ch){
+		case '1':
+            cout << "1.- Agregar Linea" << endl;
+			Agregar_Linea();
+			break;
+		case '2':
+            cout << "2.- Buscar Linea (Indexado)" << endl;
+			cout<<"Ingrese posicion supuesta de la linea" << endl; 
+            cin >> num;
+			//Busqueda_Indexada_Ciudad(num);
+			break;
+		case '3':
+			cout << "3.- Buscar Lineas (ID, osea no indexada)" << endl;
+			cout << "Ingrese la identidad de la persona cuya(s) linea(s) que busca" << endl;
+            cin >> num;
+			Busqueda_No_Indexada_Lineas(num);
+			break;
+		case '4':
+            cout << "4.- Listar Lineas" << endl;
+			Listar_Lineas();
+			break;
+		case '5':
+			cout << "5.- Eliminar Lineas" << endl;
+			cout << "Ingrese el numero telefonico que va a eliminar" << endl;
+            cin >> num;
+			//Eliminar_Lineas();
+			break;
+		 case '6':
+			cout << "Adios!";
+			break;
+		}
+    }while(ch!='6');
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------
