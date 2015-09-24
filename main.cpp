@@ -440,6 +440,7 @@ void Listar_Ciudades();
 void Eliminar_Ciudad(int);
 void Modificar_Ciudades(int);
 void Busqueda_No_Indexada_Ciudad(int);
+void Busqueda_Indexada_Ciudad(int);
 
 //Metodos relacionados con el cliente
 void Agregar_Cliente();
@@ -641,7 +642,7 @@ void Administrar_Clientela(){
          	cout << "2.- Buscar Clientes (Indexado)" << endl;
 			cout<<"Ingrese posicion supuesta del usuario" << endl; 
          	cin >> num;
-			Busqueda_Indexada_Clientes(index);
+			Busqueda_Indexada_Clientes(num);
 			break;
 		case '3':
 			cout << "3.- Buscar Clientes (ID, osea no indexada)" << endl;
@@ -703,7 +704,7 @@ void Administrar_Ciudades(){
             cout << "2.- Buscar Ciudades (Indexado)" << endl;
 			cout<<"Ingrese posicion supuesta de la ciudad" << endl; 
             cin >> num;
-			//Busqueda_Indexada_Ciudad(num);
+			Busqueda_Indexada_Ciudad(num);
 			break;
 		case '3':
 			cout << "3.- Buscar Ciudades (ID, osea no indexada)" << endl;
@@ -872,8 +873,8 @@ void Agregar_Cliente(){
  
 //Lee cliente del archivo
 void Busqueda_Indexada_Clientes(int n){
-    long long int matriz[500];
-    int matriz_b[500];
+    long long int matriz[1500];
+    int matriz_b[1500];
     btree arbol(7);
     Index_client clave;
     ifstream Index;
@@ -891,6 +892,15 @@ void Busqueda_Indexada_Clientes(int n){
 		Index >> clave.valor;
 		matriz[i] = clave.valor;
 		matriz_b[i] = clave.registro;
+
+	}
+
+	for(int i = 0; i< 500; i++){
+		cout << matriz_b[i] << " " << matriz[i] << endl;
+		if(n==i){
+			cout << "Persona q posee esta id: " << matriz[matriz_b[i]] << endl;
+			buscar_id_cliente(matriz[matriz_b[i]]);
+		}
 	}
 
 	cout << "Persona posee esta identidad " << matriz[matriz_b[n]] << endl;
@@ -1001,7 +1011,7 @@ void buscar_id_cliente(long long int identidad){
 		cout << "Archivo no disponible :(" << endl;
 		return;
 	}
-	cout << "Busqueda no-indexada" << endl;
+	//cout << "Busqueda no-indexada" << endl;
     while(inFile.read((char*)&client, sizeof(Cliente))){
 		if(client.id==identidad){
 			//cout << "Cliente No.: " << client.acno << endl;
@@ -1102,7 +1112,7 @@ void Busqueda_No_Indexada_Ciudad(int n){
 		cout << "Archivo no disponible :(" << endl;
 		return;
 	}
-	cout << "Busqueda no-indexada  de ciudades" << endl;
+	//cout << "Busqueda no-indexada  de ciudades" << endl;
     while(inFile.read((char*)&city, sizeof(Ciudad))){
 		if(city.id==n){
 			cout << "Ciudad: " << city.name << endl;
@@ -1144,6 +1154,31 @@ void Modificar_Ciudades(int codigo){
 	File.close();
 	if(encontrado ==0)
 		cout<<"Registro no encontrado :(";
+}
+
+void Busqueda_Indexada_Ciudad(int n){
+	Ciudad city;
+	ifstream inFile;
+	ofstream outFile;
+	inFile.open("binary_cities.dat",ios::binary);
+	if(!inFile){
+		cout << "Archivo no disponible :(" << endl;
+		return;
+	}
+	outFile.open("temp.dat",ios::binary);
+	inFile.seekg(0,ios::beg);
+	while(inFile.read((char*)&city, sizeof(Ciudad))){
+		if(city.id==n){
+			 //outFile.write((char*)&city, sizeof(Ciudad));
+			//cout << ""
+			 cout << "ID: " << city.id << " Nombre " << city.name << endl;
+			 Busqueda_No_Indexada_Ciudad(n);
+		}
+	}
+    inFile.close();
+	outFile.close();
+	remove("binary_cities.dat");
+	rename("temp.dat","binary_cities.dat");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------
