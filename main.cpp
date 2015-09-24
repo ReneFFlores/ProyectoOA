@@ -76,6 +76,8 @@ void Listar_Clientes();
 
 //Metodos relacionados con lineas de clientes
 void Listar_Lineas();
+void Agregar_Linea();
+void Busqueda_No_Indexada_Lineas(string);
 
 //Metodos relacionados con las transacciones
 void Listar_Todo();
@@ -98,6 +100,8 @@ int main(int argc,char*argv[]){
    //Listar_Ciudades();
    //Listar_Todo();
    //Listar_Lineas();
+   Agregar_Linea();
+   Busqueda_No_Indexada_Lineas("1010198810499");
    
    remove("binary_client.dat");
    remove("binary_cities.dat");
@@ -211,7 +215,7 @@ void Administrar_Clientela(){
 		switch(ch){
 		case '1':
          cout << "1.- Agregar Clientes" << endl;
-			write_Cliente();
+			Agregar_Cliente();
 			break;
 		case '2':
          cout << "2.- Buscar Clientes (Indexado)" << endl;
@@ -252,9 +256,7 @@ void Administrar_Ciudades(){
 	char ch;
 	int num;
 	string identidad_busqueda = "";
-	/*
 
-void Modificar_Ciudades(int);;*/
 	do{
 		cout << "Administrando las Ciudades" << endl;
 		cout << "1.- Agregar Ciudades" << endl;
@@ -633,6 +635,51 @@ void Modificar_Ciudades(int codigo){
 //------------------------------------------------------------------------------------------------------------------------------------
 //LINEAS
 
+//Agregar
+void Agregar_Linea(){
+   Lineast linea;
+   int suffix;
+   stringstream ss;
+
+   //abrimos el archivo con el ultimo registro
+   ifstream for_pos("last_number_suffix.txt");
+   for_pos >> suffix;
+   for_pos.close();
+
+   string out = "90000";
+   
+   //jugamos con la posicion 
+   remove("last_number_suffix.txt");
+   ofstream new_last_index;
+   new_last_index.open("last_number_suffix.txt");
+   new_last_index << (suffix+1);
+   new_last_index.close();
+   
+   //agregamos
+	ofstream outFile;
+	outFile.open("binary_lineas.dat",ios::binary|ios::app);
+	string identidad;
+	cout << "Ingrese identidad del usuario " << endl;
+	cin >> identidad;
+
+	for(int i = 0; i < 13; i++){
+		linea.id[i] = identidad[i];
+	}
+
+	ss << out << suffix;
+	string final_number = ss.str();
+
+	for(int i = 0; i < 8; i++){
+		linea.numero[i] = final_number[i];
+	}
+
+
+    outFile.write((char*)&linea, sizeof(Lineast));
+	outFile.close();
+
+	cout << "Linea creada!" << endl;
+}
+
 //Listar
 void Listar_Lineas(){
 	Lineast lxc;
@@ -663,6 +710,42 @@ void Listar_Lineas(){
 }//FIN LISTAR LINEAS
 
 
+void Busqueda_No_Indexada_Lineas(string identidad){
+	Lineast phone;
+	int flag = 0;
+	ifstream inFile;
+    inFile.open("binary_lineas.dat",ios::binary);
+	if(!inFile){
+		cout << "Archivo no disponible :(" << endl;
+		return;
+	}
+	cout << "Busqueda no-indexada  de lineas" << endl;
+    while(inFile.read((char*)&phone, sizeof(Lineast))){
+    	string identidad_comrapable = "";
+    	for(int i = 0; i < 13; i++){
+			identidad_comrapable+=phone.id[i];
+    	}
+		if(identidad_comrapable==identidad){
+			cout << "ID del cliente: ";
+
+			for (int i = 0; i < 13;i++){
+				cout << phone.id[i];;
+			} 
+
+			cout << " Numero: ";
+
+			for (int i = 0; i < 8;i++){
+				cout << phone.numero[i];;
+			} 
+
+			cout << endl;
+			flag = 1;
+		}
+	}
+    inFile.close();
+	if(flag==0)
+		cout << "Ciudad en esa posición no existe" << endl;
+}
 
 
 //------------------------------------------------------------------------------------------------------------------------------------
