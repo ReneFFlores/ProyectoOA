@@ -7,16 +7,29 @@
 #include <fstream>
 #include <ctype.h>
 #include <iomanip>
+#include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
 #include <cstdlib>
 #include <sstream>
 #include <string>
 #include <cstring>
+#include <vector>
 
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//LOS USING Y DEMAS...
+
+using std::vector;
 using std::stringstream;
 using std::string;
 using namespace std;
+
+
+
 
 //------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------
@@ -26,8 +39,8 @@ using namespace std;
 //ESTRUCTURAS
 
 struct Index_client{
-   int pos;
-   long long int id_index;
+   int registro;
+   long long int valor;
 };
 
 struct Index_city{
@@ -66,6 +79,349 @@ struct Lineast{
 	char numero[8];
 };
 
+
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//CLASES DE ARBOLES Y NODOS
+
+
+
+class bnodo {
+  public:
+   bnodo(int nClaves); // Constructor
+   ~bnodo();           // Destructor
+ 
+  private:
+   int clavesUsadas;   // Claves usadas en el nodo
+   Index_client *clave;     // Array de claves del nodo
+   bnodo **puntero;    // Array de punteros a bnodo
+   bnodo *padre;       // Puntero a nodo padre
+
+  friend class btree;
+};
+
+typedef bnodo *pbnodo;
+
+bnodo::bnodo(int nClaves){
+   clavesUsadas = 0;
+   clave = new Index_client[nClaves];
+   puntero = new pbnodo[nClaves+1];
+   padre = NULL;
+}
+
+bnodo::~bnodo(){
+   delete[] clave;
+   delete[] puntero;
+}
+
+class btree {
+  public:
+   btree(int nClv);
+   ~btree();
+   long Buscar(int clave);
+   bool Insertar(Index_client clave);
+   void Borrar(int clave);
+   void Mostrar();
+
+  private:
+   Index_client *lista;
+   pbnodo *listapunt;
+   void Inserta(Index_client clave, pbnodo nodo, pbnodo hijo1, pbnodo hijo2);
+   void BorrarClave(pbnodo nodo, int valor);
+   void BorrarNodo(pbnodo nodo);
+   void PasarClaveDerecha(pbnodo derecha, pbnodo padre, pbnodo nodo, int posClavePadre);
+   void PasarClaveIzquierda(pbnodo izquierda, pbnodo padre, pbnodo nodo, int posClavePadre);
+   void FundirNodo(pbnodo izquierda, pbnodo &padre, pbnodo derecha, int posClavePadre);
+   void Ver(pbnodo nodo);
+   int nClaves, nodosMinimos;
+   pbnodo Entrada;
+};
+
+btree::btree(int nClv) : nClaves(nClv){
+   lista = new Index_client[nClaves+1];
+   listapunt = new pbnodo[nClaves+2];
+   nodosMinimos = nClaves/2; // ((nClaves+1)/2)-1;
+   Entrada = NULL;
+}
+
+btree::~btree()
+{
+   delete[] lista;
+   delete[] listapunt;
+   // Destruir árbol, algoritmo recursivo:
+   BorrarNodo(Entrada);
+}
+
+void btree::BorrarNodo(pbnodo nodo){
+   int i;
+
+   if(!nodo) return;
+   for(i = 0; i <= nodo->clavesUsadas; i++) BorrarNodo(nodo->puntero[i]);
+   delete nodo;
+}
+
+void btree::Mostrar(){
+   cout << "arbol" << endl;
+   Ver(Entrada);
+   cout << "-----" << endl;
+}
+
+void btree::Ver(pbnodo nodo){
+   int i;
+
+   if(!nodo) return;
+   for(i = 0; i < nodo->clavesUsadas-1; i++) cout << nodo->clave[i].valor << "-";
+   if(nodo->clavesUsadas) cout << nodo->clave[i].valor << " [";
+   if(nodo->padre) cout << (nodo->padre)->clave[0].valor; else cout << "*";
+   cout << "]" << endl;
+   for(i = 0; i <= nodo->clavesUsadas; i++) Ver(nodo->puntero[i]);
+}
+
+long btree::Buscar(int clave){
+   pbnodo nodo = Entrada;
+   int i;
+
+   while(nodo) {
+      i = 0;
+      while(i < nodo->clavesUsadas && (nodo->clave[i].valor < clave)) i++;
+      if(nodo->clave[i].valor == clave) return nodo->clave[i].registro;
+      else nodo = nodo->puntero[i];
+   }
+   return -1L;
+}
+
+bool btree::Insertar(Index_client clave){
+   pbnodo nodo, padre;
+   int i;
+
+   // Asegurarse de que la clave no está en el árbol
+   padre = nodo = Entrada;
+   while(nodo) {
+      padre = nodo;
+      i = 0;
+      while(i < nodo->clavesUsadas && (nodo->clave[i].valor < clave.valor)) i++;
+      if(nodo->clave[i].valor == clave.valor && i < nodo->clavesUsadas) return false;
+      else nodo = nodo->puntero[i];
+   }
+   nodo = padre;
+   Inserta(clave, nodo, NULL, NULL);
+   return true;
+}
+
+void btree::Inserta(Index_client clave, pbnodo nodo, pbnodo hijo1, pbnodo hijo2){
+   pbnodo padre, nuevo;
+   int i, j;
+   bool salir = false;
+
+   // Insertar nueva clave en nodo:
+   do {
+      if(!nodo){
+         nodo = new bnodo(nClaves);
+         nodo->clavesUsadas = 0;
+         nodo->padre = NULL;
+         Entrada = nodo;
+      }
+      padre = nodo->padre;
+      if(nodo->clavesUsadas == nClaves){ // overflow
+         // Nodo derecho
+         nuevo = new bnodo(nClaves);
+         // Construye lista ordenada:
+         i = 0;
+         while(nodo->clave[i].valor < clave.valor && i < nClaves) {
+            lista[i] = nodo->clave[i];
+            listapunt[i] = nodo->puntero[i];
+            i++;
+         }
+         lista[i] = clave;
+         listapunt[i] = hijo1;
+         listapunt[i+1] = hijo2;
+         while(i < nClaves){
+            lista[i+1] = nodo->clave[i];
+            listapunt[i+2] = nodo->puntero[i+1];
+            i++;
+         }
+         // Dividir nodos:
+         // Nodo izquierdo:
+         nodo->clavesUsadas = nClaves/2;
+         for(j = 0; j < nodo->clavesUsadas; j++){
+            nodo->clave[j] = lista[j];
+            nodo->puntero[j] = listapunt[j];
+         }
+         nodo->puntero[nodo->clavesUsadas] = listapunt[nodo->clavesUsadas];
+
+         // Nodo derecho:
+         nuevo->clavesUsadas = nClaves - nodo->clavesUsadas;
+         for(j = 0; j < nuevo->clavesUsadas; j++){
+            nuevo->clave[j] = lista[j+(nClaves/2)+1];
+            nuevo->puntero[j] = listapunt[j+(nClaves/2)+1];
+         }
+         nuevo->puntero[nuevo->clavesUsadas] = listapunt[nClaves+1];
+
+         for(j = 0; j <= nodo->clavesUsadas; j++)
+            if(nodo->puntero[j]) (nodo->puntero[j])->padre = nodo;
+         for(j = 0; j <= nuevo->clavesUsadas; j++)
+            if(nuevo->puntero[j]) (nuevo->puntero[j])->padre = nuevo;
+
+         clave = lista[nClaves/2];
+         hijo1 = nodo;
+         hijo2 = nuevo;
+         nodo = padre;
+      }else{
+         // Inserta nueva clave en su lugar:
+         i = 0;
+         if(nodo->clavesUsadas > 0){
+            while(nodo->clave[i].valor < clave.valor && i < nodo->clavesUsadas) i++;
+            for(j = nodo->clavesUsadas; j > i; j--)
+               nodo->clave[j] = nodo->clave[j-1];
+            for(j = nodo->clavesUsadas+1; j > i; j--)
+               nodo->puntero[j] = nodo->puntero[j-1];
+         }
+         nodo->clavesUsadas++;
+         nodo->clave[i] = clave;
+         nodo->puntero[i] = hijo1;
+         nodo->puntero[i+1] = hijo2;
+         if(hijo1) hijo1->padre = nodo;
+         if(hijo2) hijo2->padre = nodo;
+         salir = true;
+      }
+   } while(!salir);
+}
+
+void btree::Borrar(int valor){
+   pbnodo nodo;
+   bool encontrado = false;
+   int i;
+
+   // Busca el nodo que contiene la clave, si existe
+   nodo = Entrada;
+   while(nodo && !encontrado) {
+      i = 0;
+      while(i < nodo->clavesUsadas && (nodo->clave[i].valor < valor)) i++;
+      if(nodo->clave[i].valor == valor && i < nodo->clavesUsadas) encontrado = true;
+      else nodo = nodo->puntero[i];
+   }
+   if(encontrado) BorrarClave(nodo, valor);
+}
+
+void btree::BorrarClave(pbnodo nodo, int valor){
+   pbnodo actual, derecha, izquierda, padre;
+   int posClavePadre, pos, i;
+
+   // Buscar posición dentro de lista de claves:
+   pos = 0;
+   while(nodo->clave[pos].valor < valor) pos++;
+
+   // Esta el
+   if(nodo->puntero[0]) { // No, se trata de un nodo intermedio
+      // Buscar actual del valor siguiente:
+      actual = nodo->puntero[pos+1];
+      while(actual->puntero[0]) actual = actual->puntero[0];
+      // Intercambiar con el valor siguiente:
+      nodo->clave[pos] = actual->clave[0];
+      // La posición de la clave a borrar en ahora la 0:
+      pos = 0;
+   } else actual = nodo;
+
+   // Borrar clave
+   for(i = pos; i < actual->clavesUsadas; i++)
+      actual->clave[i] = actual->clave[i+1];
+   actual->clavesUsadas--;
+
+   if(actual == Entrada && actual->clavesUsadas == 0){
+      delete actual;
+      Entrada = NULL;
+      return;
+   }
+
+   // Comparamos mmino
+   if(actual == Entrada || actual->clavesUsadas >= nodosMinimos) return;
+
+   do {
+      // El número de claves es menor que el mínimo:
+      // Buscar nodos a derecha e izquierda:
+      padre = actual->padre;
+      for(posClavePadre = 0;
+         padre->puntero[posClavePadre] != actual;
+         posClavePadre++);
+      if(posClavePadre > 0)
+         izquierda = padre->puntero[posClavePadre-1];
+      else izquierda = NULL;
+      if(posClavePadre < padre->clavesUsadas)
+         derecha = padre->puntero[posClavePadre+1];
+      else derecha = NULL;
+
+      // Intentar pasar una clave de un nodo cercano:
+      if(derecha && derecha->clavesUsadas > nodosMinimos)
+         PasarClaveDerecha(derecha, padre, actual, posClavePadre);
+      else if(izquierda && izquierda->clavesUsadas > nodosMinimos)
+         PasarClaveIzquierda(izquierda, padre, actual, posClavePadre-1);
+ 
+
+      else if(derecha) 
+         FundirNodo(actual, padre, derecha, posClavePadre);
+      else 
+         FundirNodo(izquierda, padre, actual, posClavePadre-1);
+
+
+      actual = padre;
+   } while(actual && actual != Entrada && actual->clavesUsadas < nodosMinimos);
+}
+
+void btree::PasarClaveDerecha(pbnodo derecha, pbnodo padre, pbnodo nodo, int posClavePadre){
+   int i;
+
+   nodo->clave[nodo->clavesUsadas] = padre->clave[posClavePadre];
+   nodo->clavesUsadas++;
+   padre->clave[posClavePadre] = derecha->clave[0];
+   nodo->puntero[nodo->clavesUsadas] = derecha->puntero[0];
+   if(derecha->puntero[0]) derecha->puntero[0]->padre = nodo;
+   for(i = 0; i < derecha->clavesUsadas; i++) derecha->clave[i] = derecha->clave[i+1];
+   for(i = 0; i <= derecha->clavesUsadas; i++) derecha->puntero[i] = derecha->puntero[i+1];
+   derecha->clavesUsadas--;
+}
+
+void btree::PasarClaveIzquierda(pbnodo izquierda, pbnodo padre, pbnodo nodo, int posClavePadre){
+   int i;
+
+   for(i = nodo->clavesUsadas; i > 0; i--) nodo->clave[i] = nodo->clave[i-1];
+   for(i = nodo->clavesUsadas+1; i > 0; i--) nodo->puntero[i] = nodo->puntero[i-1];
+   nodo->clavesUsadas++;
+   nodo->clave[0] = padre->clave[posClavePadre];
+   padre->clave[posClavePadre] = izquierda->clave[izquierda->clavesUsadas-1];
+   nodo->puntero[0] = izquierda->puntero[izquierda->clavesUsadas];
+   if(nodo->puntero[0]) nodo->puntero[0]->padre = nodo;
+   izquierda->clavesUsadas--;
+}
+
+void btree::FundirNodo(pbnodo izquierda, pbnodo &padre, pbnodo derecha, int posClavePadre){
+   int i;
+
+   izquierda->clave[izquierda->clavesUsadas] = padre->clave[posClavePadre];
+   padre->clavesUsadas--;
+   for(i = posClavePadre; i < padre->clavesUsadas; i++) {
+      padre->clave[i] = padre->clave[i+1];
+      padre->puntero[i+1] = padre->puntero[i+2];
+   }
+   izquierda->clavesUsadas++;
+   for(i = 0; i < derecha->clavesUsadas; i++)
+      izquierda->clave[izquierda->clavesUsadas+i] = derecha->clave[i];
+   for(i = 0; i <= derecha->clavesUsadas; i++) {
+      izquierda->puntero[izquierda->clavesUsadas+i] = derecha->puntero[i];
+      if(derecha->puntero[i]) derecha->puntero[i]->padre = izquierda;
+   }
+   izquierda->clavesUsadas += derecha->clavesUsadas;
+   if(padre == Entrada && padre->clavesUsadas == 0) { // Cambio de entrada
+      Entrada = izquierda;
+      Entrada->padre = NULL;
+      delete padre;
+      padre = NULL;
+   }
+   delete derecha;
+}
+
 //------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------
@@ -87,8 +443,9 @@ void Busqueda_No_Indexada_Ciudad(int);
 
 //Metodos relacionados con el cliente
 void Agregar_Cliente();
-void Busqueda_Indexada(long long int);
+void Busqueda_Indexada_Clientes(int);
 void buscar_id_cliente(long long int);
+void Crear_Arbol_Clientes();
 void modify_Cliente(long long int);
 void delete_Cliente(long long int);
 void Listar_Clientes();
@@ -117,26 +474,41 @@ void Administrar_Transacciones();
 
 int main(int argc,char*argv[]){
    Cliente_txt_bin();
-   //Index_Cliente_txt_bin();
    City_txt_bin();
    Lineas_txt_bin();
-   //Eliminar_Ciudad(int);
-   //Administrar_Clientela();
-   //Modificar_Ciudades(int);
-   //modify_Cliente(1027199510077);
-   //Agregar_Ciudad();
-   //Agregar_Cliente();
-   //Busqueda_No_Indexada_Ciudad(int);
-   //Listar_Ciudades();
-   //Listar_Todo();
-   //Listar_Lineas();
-   //Agregar_Linea();
-   //Busqueda_No_Indexada_Lineas("1010198810499");
-   //Generar_Factura(1010198810499);
+   int opcion;
+
+   while(true){
+	   	cout << "Ingrese su opcion" << endl;
+	   	cout << "1.- Sobre clientes" << endl;
+	   	cout << "2.- Sobre ciudades" << endl;
+	   	cout << "3.- Sobre Lineas" << endl;
+	   	cout << "4.- Spbre Facturaciones" << endl;
+	   	cout << "5+ .- Salir" << endl;
+	   	cin >> opcion;
+
+	   	if(opcion == 1){
+	   		Administrar_Clientela();
+	   	}else if(opcion==2){
+	   		Administrar_Ciudades();
+	   	}else if(opcion == 3){
+	   		Administrar_Lineas();
+	   	}else if(opcion == 4){
+	   		long long int identidad;
+	   		cout << "Ingrese identidad de la persona a cambiar" << endl;
+	   		cin >> identidad;
+	   		Administrar_Transacciones();
+	   	}else{
+	   		cout << "Adios!" << endl;
+	   		break;
+	   	}
+
+   }
    
    remove("binary_client.dat");
    remove("binary_cities.dat");
    remove("binary_lineas.dat");
+   remove("client_index.dat");
    return 0;
 }
 
@@ -179,8 +551,8 @@ void Cliente_txt_bin(){
       outFile.write((char*)&client, sizeof(Cliente));
 
       //para los clientes en sus indices
-      client_index.id_index = idd;
-      client_index.pos = i;
+      client_index.valor = idd;
+      client_index.registro = i;
       Index.write((char*)&client_index, sizeof(Index));
     }
 
@@ -248,6 +620,7 @@ void Administrar_Clientela(){
 	char ch;
 	long long int num;
 	long long int identidad_busqueda;
+	int index;
 	do{
 		cout << "Administrando la clientela" << endl;
 		cout << "1.- Agregar Clientes" << endl;
@@ -268,7 +641,7 @@ void Administrar_Clientela(){
          	cout << "2.- Buscar Clientes (Indexado)" << endl;
 			cout<<"Ingrese posicion supuesta del usuario" << endl; 
          	cin >> num;
-			Busqueda_Indexada(num);
+			Busqueda_Indexada_Clientes(index);
 			break;
 		case '3':
 			cout << "3.- Buscar Clientes (ID, osea no indexada)" << endl;
@@ -299,7 +672,7 @@ void Administrar_Clientela(){
 			break;
 		 case '8':
 			cout << "Adios!";
-			exit(0);
+			break;
 		 default:cout<<"\a";
 		}
 		//getch();
@@ -355,7 +728,7 @@ void Administrar_Ciudades(){
 			break;
 		 case '7':
 			cout << "Adios!";
-			exit(0);
+			break;
 		 default:cout<<"\a";
 		}
 		//getch();
@@ -417,35 +790,28 @@ void Administrar_Transacciones(){
 
 	do{
 		cout << "Administrando las Transacciones" << endl;
-		cout << "1.- Generar Factura ineficiente" << endl;
-		cout << "2.- Generar Factura eficiente" << endl;
-		cout << "3.- Listar todas las transacciones" << endl;
-		cout << "4.- Salir" << endl;
+		cout << "1.- Generar Factura" << endl;
+		cout << "2.- Listar todas las transacciones" << endl;
+		cout << "3.- Salir" << endl;
 		cin >> ch;
 		switch(ch){
 			case '1':
-            cout << "1.- Generar Factura ineficiente" << endl;
+            cout << "1.- Generar Factura" << endl;
             cout << "Ingrese la identidad de la persona que busca" << endl;
             cin >> identidad_busqueda;
 			Generar_Factura(identidad_busqueda);
 			break;
 		case '2':
-            cout << "2.- Generar Factura eficiente" << endl;
-			cout << "Ingrese la identidad de la persona que busca" << endl; 
-            cin >> num;
-			//Busqueda_Indexada_Ciudad(num);
-			break;
-		case '3':
 			cout << "3.- Buscar Lineas (ID, osea no indexada)" << endl;
 			cout << "Ingrese la identidad de la persona cuya(s) linea(s) que busca" << endl;
             cin >> identidad_busqueda;
 			Busqueda_No_Indexada_Lineas(identidad_busqueda);
 			break;
-		case '4':
+		case '3':
             cout << "Adios!" << endl;
 			break;
 		}
-    }while(ch!='4');
+    }while(ch!='3');
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------
@@ -505,29 +871,35 @@ void Agregar_Cliente(){
 }
  
 //Lee cliente del archivo
-void Busqueda_Indexada(long long int n){
-	Cliente client;
-	int flag = 0;
-	ifstream inFile;
-    inFile.open("binary_client.dat",ios::binary);
-	if(!inFile){
+void Busqueda_Indexada_Clientes(int n){
+    long long int matriz[500];
+    int matriz_b[500];
+    btree arbol(7);
+    Index_client clave;
+    ifstream Index;
+    Index.open("clientes_indices.txt");
+
+   	Cliente client;
+ 
+	if(!Index){
 		cout << "Archivo no disponible :(" << endl;
 		return;
 	}
-	cout << "Busqueda indexada" << endl;
-    while(inFile.read((char*)&client, sizeof(Cliente))){
-		if(client.id==n){
-		  cout << "ID: " << client.id << endl;
-	      cout << "Nombre: " << client.name << endl;
-	      cout << "Sexo: " << client.gender << endl;
-	      cout << "City ID: " << client.id_city << endl;
-		  flag = 1;
-		  break;
-		}
+
+	for(int i = 0; i < 500; i++){
+		Index >> clave.registro;
+		Index >> clave.valor;
+		matriz[i] = clave.valor;
+		matriz_b[i] = clave.registro;
 	}
-    inFile.close();
-	if(flag==0)
-		cout << "Cliente en esa posición no existe" << endl;
+
+	cout << "Persona posee esta identidad " << matriz[matriz_b[n]] << endl;
+	buscar_id_cliente(matriz[matriz_b[n]]);
+
+	Index.close();
+
+    cout << endl;
+
 }//FIN MOSTRAR
  
 //Modifica al archivo
@@ -844,7 +1216,7 @@ void Listar_Lineas(){
 	}
 
 	inFile.close();
-	
+
 }//FIN LISTAR LINEAS
 
 
@@ -1004,4 +1376,38 @@ void Generar_Factura(long long int cliente){
 
 	cout << "Total factura (precio sin impuesto): " << (total/60.0)*dollar_per_second << " $" << endl;
 	cout << "Total factura con impuestos: " << (total/60.0)*dollar_per_second*1.15 << " $" << endl;
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------
+//METODOS DE ARBOLES
+
+//Arbol para clientes
+void Crear_Arbol_Clientes(){
+   int matriz[500];
+   btree arbol(7);
+   Index_client clave;
+
+   for(int i = 0; i < 500; i++) {
+      do {
+         matriz[i] = rand()%1000000000000;
+         clave.valor = matriz[i];
+         clave.registro = i;
+      } while(!arbol.Insertar(clave));
+   }
+
+   cout << "mostrar: " << endl;
+   arbol.Mostrar();
+
+   /*cout << "Buscar elemento 23: " << matriz[23] << " posicion: " <<
+     arbol.Buscar(matriz[23]) << endl;
+
+   for(i = 0; i < 50; i++) {
+      cout << "Borrar: [" << i << "]: " << matriz[i] << endl;
+      arbol.Borrar(matriz[i]);
+   }
+   arbol.Mostrar();*/
 }
