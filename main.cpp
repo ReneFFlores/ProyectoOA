@@ -27,7 +27,7 @@ using namespace std;
 
 struct Index_client{
    int pos;
-   char id_index[13];
+   long long int id_index;
 };
 
 struct Index_city{
@@ -50,8 +50,7 @@ struct Llamadas{
 };
 
 struct Cliente{
-   char id[13];
-	int acno;
+    long long int id;
 	char name[40];
 	char gender;
 	int id_city;
@@ -63,7 +62,7 @@ struct Ciudad{
 };
 
 struct Lineast{
-	char id[13];
+	long long int id;
 	char numero[8];
 };
 
@@ -88,20 +87,20 @@ void Busqueda_No_Indexada_Ciudad(int);
 
 //Metodos relacionados con el cliente
 void Agregar_Cliente();
-void Busqueda_Indexada(int);
-void buscar_id_cliente(string);
-void modify_Cliente(int);
-void delete_Cliente(int);
+void Busqueda_Indexada(long long int);
+void buscar_id_cliente(long long int);
+void modify_Cliente(long long int);
+void delete_Cliente(long long int);
 void Listar_Clientes();
 
 //Metodos relacionados con lineas de clientes
 void Listar_Lineas();
 void Agregar_Linea();
-void Busqueda_No_Indexada_Lineas(string);
+void Busqueda_No_Indexada_Lineas(long long int);
 
 //Metodos relacionados con las transacciones
 void Listar_Todo();
-void Generar_Factura(string);
+void Generar_Factura(long long int);
 
 //Metodos relacionados con menues
 void Administrar_Clientela();
@@ -124,15 +123,16 @@ int main(int argc,char*argv[]){
    //Eliminar_Ciudad(int);
    //Administrar_Clientela();
    //Modificar_Ciudades(int);
+   //modify_Cliente(1027199510077);
    //Agregar_Ciudad();
    //Agregar_Cliente();
    //Busqueda_No_Indexada_Ciudad(int);
    //Listar_Ciudades();
-   Listar_Todo();
+   //Listar_Todo();
    //Listar_Lineas();
    //Agregar_Linea();
    //Busqueda_No_Indexada_Lineas("1010198810499");
-   //Generar_Factura("1010198810499");
+   //Generar_Factura(1010198810499);
    
    remove("binary_client.dat");
    remove("binary_cities.dat");
@@ -150,12 +150,19 @@ int main(int argc,char*argv[]){
 
 //Clientes a binario
 void Cliente_txt_bin(){
+
     ifstream text_clientes("clientes.txt");
+    Index_client client_index;
 	ofstream outFile;
+	ofstream Index;
 	outFile.open("binary_client.dat",ios::binary|ios::app);
+	Index.open("client_index.dat",ios::binary|ios::app);
+
     for(int i = 0; i < 500; i++){
+      //para los clientes en si clase normal
       Cliente client;
-      string idd, nom, apel, sex, nom_com = "";
+      string nom, apel, sex, nom_com = "";
+      long long int idd;
       int id_city_str;
       text_clientes >> idd;
       text_clientes >> nom;
@@ -166,12 +173,19 @@ void Cliente_txt_bin(){
       nom_com+=" ";
       nom_com+=apel;
       strcpy(client.name, nom_com.c_str());//nombre str to nombre c-40
-      strcpy(client.id, idd.c_str());
       client.gender = sex[0];
       client.id_city = id_city_str;
-      client.acno = i;
+      client.id = idd;
       outFile.write((char*)&client, sizeof(Cliente));
+
+      //para los clientes en sus indices
+      client_index.id_index = idd;
+      client_index.pos = i;
+      Index.write((char*)&client_index, sizeof(Index));
     }
+
+
+    Index.close();
     text_clientes.close();
 	outFile.close();
 }
@@ -209,13 +223,9 @@ void Lineas_txt_bin(){
     for(int i = 0; i < 500; i++){
       Lineast lxc;
       string numero_tel = "";
-      string id_cliente = "";
+      long long int id_cliente;
       text_lineas >> id_cliente;
       text_lineas >> numero_tel;
-
-      for(int j = 0; j < 13; j++){
-        lxc.id[j] = id_cliente[j];        
-      }
 
       for(int j = 0; j < 8; j++){
       	lxc.numero[j] = numero_tel[j];
@@ -236,8 +246,8 @@ void Lineas_txt_bin(){
  
 void Administrar_Clientela(){
 	char ch;
-	int num;
-	string identidad_busqueda = "";
+	long long int num;
+	long long int identidad_busqueda;
 	do{
 		cout << "Administrando la clientela" << endl;
 		cout << "1.- Agregar Clientes" << endl;
@@ -246,7 +256,8 @@ void Administrar_Clientela(){
 		cout << "4.- Listar Clientes" << endl;
 		cout << "5.- Eliminar Cliente" << endl;
 		cout << "6.- Modificar Cliente" << endl;
-		cout << "7.- Salir" << endl;
+		cout << "7.- Listar el archivo indexado" << endl;
+		cout << "8.- Salir" << endl;
 		cin >> ch;
 		switch(ch){
 		case '1':
@@ -279,13 +290,20 @@ void Administrar_Clientela(){
          	cin >> num;
 			modify_Cliente(num);
 			break;
-		 case '7':
+		case '7':
+			cout << "7.- Listar el archivo indexado" << endl;
+			long long int identity;
+			cout << "Ingrese identidad" << endl;
+         	cin >> identity;
+			modify_Cliente(identity);
+			break;
+		 case '8':
 			cout << "Adios!";
 			exit(0);
 		 default:cout<<"\a";
 		}
 		//getch();
-    }while(ch!='7');
+    }while(ch!='8');
 }
 
 void Administrar_Ciudades(){
@@ -347,7 +365,7 @@ void Administrar_Ciudades(){
 void Administrar_Lineas(){
 	char ch;
 	int num;
-	string identidad_busqueda = "";
+	long long int identidad_busqueda;
 
 	do{
 		cout << "Administrando las Lineas" << endl;
@@ -395,7 +413,7 @@ void Administrar_Lineas(){
 void Administrar_Transacciones(){
 	char ch;
 	int num;
-	string identidad_busqueda = "";
+	long long int identidad_busqueda;
 
 	do{
 		cout << "Administrando las Transacciones" << endl;
@@ -441,13 +459,14 @@ void Administrar_Transacciones(){
 void Agregar_Cliente(){
     Cliente client;
     //abrimos el archivo con el ultimo registro
+    int location;
     ifstream for_pos("last_index.txt");
-    for_pos >> client.acno;
+    for_pos >> location;
     for_pos.close();
    
     //jugamos con la posicion
-    int pos = client.acno+1;
-    client.acno-=10000;
+    int pos = location+1;
+    location-=10000;
     remove("last_index.txt");
     ofstream new_last_index;
     new_last_index.open("last_index.txt");
@@ -480,13 +499,13 @@ void Agregar_Cliente(){
 	ss << anio;
 	ss << (pos-1);
 	strcpy(client.name, nom_com.c_str());
-	strcpy(client.id, (ss.str()).c_str());
-   outFile.write((char*)&client, sizeof(Cliente));
+	client.id = stoll(ss.str());
+    outFile.write((char*)&client, sizeof(Cliente));
 	outFile.close();
 }
  
 //Lee cliente del archivo
-void Busqueda_Indexada(int n){
+void Busqueda_Indexada(long long int n){
 	Cliente client;
 	int flag = 0;
 	ifstream inFile;
@@ -497,14 +516,13 @@ void Busqueda_Indexada(int n){
 	}
 	cout << "Busqueda indexada" << endl;
     while(inFile.read((char*)&client, sizeof(Cliente))){
-		if(client.acno==n){
-			cout << "Cliente No.: " << client.acno << endl;
-			cout << "ID: " << client.id << endl;
+		if(client.id==n){
+		  cout << "ID: " << client.id << endl;
 	      cout << "Nombre: " << client.name << endl;
 	      cout << "Sexo: " << client.gender << endl;
 	      cout << "City ID: " << client.id_city << endl;
-			flag = 1;
-			break;
+		  flag = 1;
+		  break;
 		}
 	}
     inFile.close();
@@ -513,18 +531,17 @@ void Busqueda_Indexada(int n){
 }//FIN MOSTRAR
  
 //Modifica al archivo
-void modify_Cliente(int n){
+void modify_Cliente(long long int n){
 	int encontrado = 0;
 	Cliente client;
 	fstream File;
-   File.open("binary_client.dat",ios::binary|ios::in|ios::out);
+    File.open("binary_client.dat",ios::binary|ios::in|ios::out);
 	if(!File){
 		cout << "Archivo no disponible :(" << endl;
 		return;
 	}
     while(File.read((char*)&client, sizeof(Cliente)) && encontrado == 0){
-		if(client.acno==n){
-	      cout << "Cliente No.: " << client.acno << endl;
+		if(client.id==n){
 	      cout << "Nombre: " << client.name << endl;
 	      cout << "Sexo: " << client.gender << endl;
 		  cout << "Editando cliente" << endl;
@@ -552,12 +569,13 @@ void modify_Cliente(int n){
 	}
 	File.close();
 	if(encontrado ==0)
-		cout<<"Registro no encontrado :(";
+		cout<<"Registro no encontrado :(" << endl;
 }//FIN MODIFICAR
  
+
  
 //Borrar-deletear archivo
-void delete_Cliente(int n){
+void delete_Cliente(long long int n){
 	Cliente client;
 	ifstream inFile;
 	ofstream outFile;
@@ -569,17 +587,18 @@ void delete_Cliente(int n){
 	outFile.open("temp.dat",ios::binary);
 	inFile.seekg(0,ios::beg);
 	while(inFile.read((char*)&client, sizeof(Cliente))){
-		if(client.acno!=n){
+		if(client.id!=n){
 			outFile.write((char*)&client, sizeof(Cliente));
 		}
 	}
-   inFile.close();
+    inFile.close();
 	outFile.close();
 	remove("binary_client.dat");
 	rename("temp.dat","binary_client.dat");
 	cout << "Cliente eliminado";
 }//DELETEAR CLIENTE
  
+
 //LISTAR 
 void Listar_Clientes(){
 	Cliente client;
@@ -600,7 +619,7 @@ void Listar_Clientes(){
 }//FIN LISTAR CLIENTES
 
 //BUSQUEDA NO INDEXADA
-void buscar_id_cliente(string identidad){
+void buscar_id_cliente(long long int identidad){
 	Cliente client;
 	bool flag = false;
 	bool equals = false;
@@ -612,8 +631,7 @@ void buscar_id_cliente(string identidad){
 	}
 	cout << "Busqueda no-indexada" << endl;
     while(inFile.read((char*)&client, sizeof(Cliente))){
-      string temp(client.id);
-		if(temp==identidad){
+		if(client.id==identidad){
 			//cout << "Cliente No.: " << client.acno << endl;
 			cout << "ID: " << client.id << endl;
 	        cout << "Nombre: " << client.name << endl;
@@ -790,10 +808,6 @@ void Agregar_Linea(){
 	cout << "Ingrese identidad del usuario " << endl;
 	cin >> identidad;
 
-	for(int i = 0; i < 13; i++){
-		linea.id[i] = identidad[i];
-	}
-
 	ss << out << suffix;
 	string final_number = ss.str();
 
@@ -820,13 +834,7 @@ void Listar_Lineas(){
 
 	while(inFile.read((char*) &lxc, sizeof(Lineast))){
 
-	     cout << "ID: ";
-
-	     for(int i = 0; i < 13; i++){
-	     	cout << lxc.id[i];
-	     }
-
-	     cout << " numero telefonico: ";
+	     cout << "ID: " << lxc.id << " numero telefonico: ";
 
 	     for(int i = 0; i < 8; i++){
 	     	cout << lxc.numero[i];
@@ -834,11 +842,13 @@ void Listar_Lineas(){
 
 	     cout << endl;
 	}
+
 	inFile.close();
+	
 }//FIN LISTAR LINEAS
 
 
-void Busqueda_No_Indexada_Lineas(string identidad){
+void Busqueda_No_Indexada_Lineas(long long int identidad){
 	Lineast phone;
 	int flag = 0;
 	ifstream inFile;
@@ -847,20 +857,19 @@ void Busqueda_No_Indexada_Lineas(string identidad){
 		cout << "Archivo no disponible :(" << endl;
 		return;
 	}
+
 	cout << "Busqueda no-indexada  de lineas" << endl;
     while(inFile.read((char*)&phone, sizeof(Lineast))){
-    	string identidad_comrapable = "";
+
+
+    	/*string identidad_comrapable = "";
     	for(int i = 0; i < 13; i++){
 			identidad_comrapable+=phone.id[i];
-    	}
-		if(identidad_comrapable==identidad){
-			cout << "ID del cliente: ";
+    	}*/
 
-			for (int i = 0; i < 13;i++){
-				cout << phone.id[i];;
-			} 
 
-			cout << " Numero: ";
+		if(phone.id==identidad){
+			cout << "ID del cliente: " << phone.id << " Numero: ";
 
 			for (int i = 0; i < 8;i++){
 				cout << phone.numero[i];;
@@ -881,6 +890,7 @@ void Busqueda_No_Indexada_Lineas(string identidad){
 //------------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------------
 //TRANSACCIONES DE LLAMADAS
+
 void Listar_Todo(){
 	ifstream inFile;
 	inFile.open("llamadas.txt",ios::binary);
@@ -889,7 +899,9 @@ void Listar_Todo(){
 		cout << "Archivo no disponible :(" << endl;
 		return;
 	}	
+
     int i = 0;
+
 	while(!inFile.eof()){
        string emisor_id, receptor_id, emisor_num, receptor_num, date_init, date_end;
        string seconds;
@@ -902,16 +914,19 @@ void Listar_Todo(){
        inFile >> seconds;       
 	   cout << i << ".- " << emisor_id << '(' << emisor_num << ") llamo al " << receptor_num << " por " << seconds << " segundos" << endl;
 	   i++;
+
 	   if(inFile.eof()){
          break;
       }
+
 	}
+
 	inFile.close();
 }//FIN LISTAR TODAS LAS TRANSACCIONES
 
 
 //Generar_Factura
-void Generar_Factura(string cliente){
+void Generar_Factura(long long int cliente){
 	ifstream inFile;
 	inFile.open("llamadas.txt",ios::binary);
  
@@ -924,7 +939,8 @@ void Generar_Factura(string cliente){
 
 	while(!inFile.eof()){
 		stringstream ss;
-	    string emisor_id, receptor_id, emisor_num, receptor_num, date_init, date_end;
+	    string receptor_id, emisor_num, receptor_num, date_init, date_end;
+	    long long int emisor_id;
 	    float seconds;
 	    inFile >> emisor_id;
 	    inFile >> emisor_num;
@@ -934,22 +950,25 @@ void Generar_Factura(string cliente){
 	    inFile >> date_end;
 	    inFile >> seconds; 
 
-		for(int i = 0; i < 13; i++){
+		/*for(int i = 0; i < 13; i++){
 		   if(emisor_id[i]!=cliente[i]){
 		   	  break;
-		   }else{
-		   	  if(i==12 && emisor_id[i] == cliente[i]){
-		   	  	 ss << emisor_id << '(' << emisor_num << ") llamo al " << receptor_num << " por " << seconds << " segundos";
-		   	  	 cout << ss.str() << endl;
-		   	  	 total+=seconds;
-		   	  }
-		   }
-		}//fin for
+		   }else{*/
+
+		if(emisor_id==cliente){
+		    ss << emisor_id << '(' << emisor_num << ") llamo al " << receptor_num << " por " << seconds << " segundos";
+		    cout << ss.str() << endl;
+		   	total+=seconds;
+		}
+
+		   /*}
+		}//fin for*/
 
 		if(inFile.eof()){
             break;
         }
 	}
+
 	inFile.close();
 
 	int op;
@@ -971,12 +990,16 @@ void Generar_Factura(string cliente){
 
 	if(op==1){
 	   dollar_per_second = 0.01;
+
 	}else if(op==2){
 		dollar_per_second = 0.04;
+
 	}else if(op==3){
 		dollar_per_second = 0.05;
+
 	}else{
 		dollar_per_second = 0.99;
+
 	}
 
 	cout << "Total factura (precio sin impuesto): " << (total/60.0)*dollar_per_second << " $" << endl;
