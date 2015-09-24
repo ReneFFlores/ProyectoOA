@@ -95,7 +95,7 @@ void Busqueda_No_Indexada_Lineas(string);
 
 //Metodos relacionados con las transacciones
 void Listar_Todo();
-//void Generar_Factura();
+void Generar_Factura_Ineficiente(string);
 
 //Metodos relacionados con menues
 void Administrar_Clientela();
@@ -122,8 +122,9 @@ int main(int argc,char*argv[]){
    //Listar_Ciudades();
    //Listar_Todo();
    //Listar_Lineas();
-   Agregar_Linea();
-   Busqueda_No_Indexada_Lineas("1010198810499");
+   //Agregar_Linea();
+   //Busqueda_No_Indexada_Lineas("1010198810499");
+   Generar_Factura_Ineficiente("1010198810499");
    
    remove("binary_client.dat");
    remove("binary_cities.dat");
@@ -141,10 +142,10 @@ int main(int argc,char*argv[]){
 
 //Clientes a binario
 void Cliente_txt_bin(){
-   ifstream text_clientes("clientes.txt");
+    ifstream text_clientes("clientes.txt");
 	ofstream outFile;
 	outFile.open("binary_client.dat",ios::binary|ios::app);
-   for(int i = 0; i < 500; i++){
+    for(int i = 0; i < 500; i++){
       Cliente client;
       string idd, nom, apel, sex, nom_com = "";
       int id_city_str;
@@ -162,8 +163,8 @@ void Cliente_txt_bin(){
       client.id_city = id_city_str;
       client.acno = i;
       outFile.write((char*)&client, sizeof(Cliente));
-   }
-   text_clientes.close();
+    }
+    text_clientes.close();
 	outFile.close();
 }
 
@@ -241,33 +242,33 @@ void Administrar_Clientela(){
 		cin >> ch;
 		switch(ch){
 		case '1':
-         cout << "1.- Agregar Clientes" << endl;
+         	cout << "1.- Agregar Clientes" << endl;
 			Agregar_Cliente();
 			break;
 		case '2':
-         cout << "2.- Buscar Clientes (Indexado)" << endl;
+         	cout << "2.- Buscar Clientes (Indexado)" << endl;
 			cout<<"Ingrese posicion supuesta del usuario" << endl; 
-         cin >> num;
+         	cin >> num;
 			Busqueda_Indexada(num);
 			break;
 		case '3':
 			cout << "3.- Buscar Clientes (ID, osea no indexada)" << endl;
 			cout << "Ingrese la identidad de la persona que busca" << endl;
-         cin >> identidad_busqueda;
+         	cin >> identidad_busqueda;
 			buscar_id_cliente(identidad_busqueda);
 			break;
 		case '4':
-         cout << "4.- Listar Clientes" << endl;
+         	cout << "4.- Listar Clientes" << endl;
 			Listar_Clientes();
 			break;
 		case '5':
 			cout << "5.- Eliminar Cliente" << endl;
-         cin >> num;
+         	cin >> num;
 			delete_Cliente(num);
 			break;
 		 case '6':
 			cout << "6.- Modificar Cliente" << endl;
-         cin >> num;
+         	cin >> num;
 			modify_Cliente(num);
 			break;
 		 case '7':
@@ -363,8 +364,8 @@ void Administrar_Lineas(){
 		case '3':
 			cout << "3.- Buscar Lineas (ID, osea no indexada)" << endl;
 			cout << "Ingrese la identidad de la persona cuya(s) linea(s) que busca" << endl;
-            cin >> num;
-			Busqueda_No_Indexada_Lineas(num);
+            cin >> identidad_busqueda;
+			Busqueda_No_Indexada_Lineas(identidad_busqueda);
 			break;
 		case '4':
             cout << "4.- Listar Lineas" << endl;
@@ -861,3 +862,75 @@ void Listar_Todo(){
 	}
 	inFile.close();
 }//FIN LISTAR TODAS LAS TRANSACCIONES
+
+
+//Generar_Factura_Ineficiente
+void Generar_Factura_Ineficiente(string cliente){
+	ifstream inFile;
+	inFile.open("llamadas.txt",ios::binary);
+ 
+	if(!inFile){
+		cout << "Archivo no disponible :(" << endl;
+		return;
+	}	
+
+	float total = 0.00;
+
+	while(!inFile.eof()){
+		stringstream ss;
+	    string emisor_id, receptor_id, emisor_num, receptor_num, date_init, date_end;
+	    float seconds;
+	    inFile >> emisor_id;
+	    inFile >> emisor_num;
+	    inFile >> receptor_id;
+	    inFile >> receptor_num;
+	    inFile >> date_init;
+	    inFile >> date_end;
+	    inFile >> seconds; 
+
+		for(int i = 0; i < 13; i++){
+		   if(emisor_id[i]!=cliente[i]){
+		   	  break;
+		   }else{
+		   	  if(i==12 && emisor_id[i] == cliente[i]){
+		   	  	 ss << emisor_id << '(' << emisor_num << ") llamo al " << receptor_num << " por " << seconds << " segundos";
+		   	  	 cout << ss.str() << endl;
+		   	  	 total+=seconds;
+		   	  }
+		   }
+		}//fin for
+
+		if(inFile.eof()){
+            break;
+        }
+	}
+	inFile.close();
+
+	int op;
+	float dollar_per_second;
+
+	while(true){
+		cout << "Ingrese modo de servicio general del cliente " << endl;
+		cout << "1.- Basico, 0.01$ por minuto" << endl;
+		cout << "2.- Normal, 0.04$ por minuto" << endl;
+		cout << "3.- Excelente, 0.05$ por minuto" << endl;
+		cout << "4.- Videollamada, 0.99$ por minuto" << endl;
+		cin >> op;
+		if(op<=4||op>=0){
+			break;
+		}
+	}
+
+	if(op==1){
+	   dollar_per_second = 0.01;
+	}else if(op==2){
+		dollar_per_second = 0.04;
+	}else if(op==3){
+		dollar_per_second = 0.05;
+	}else{
+		dollar_per_second = 0.99;
+	}
+
+	cout << "Total factura (precio sin impuesto): " << (total/60.0)*dollar_per_second << " $" << endl;
+	cout << "Total factura con impuestos: " << (total/60.0)*dollar_per_second*1.15 << " $" << endl;
+}
